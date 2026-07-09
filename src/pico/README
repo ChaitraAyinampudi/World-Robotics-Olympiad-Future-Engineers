@@ -1,0 +1,162 @@
+````markdown
+### Time-of-Flight Sensor System
+[All Raspberry Pi Pico and VL53L0X code files are in this directory](./)
+
+The Raspberry Pi Pico operates three VL53L0X Time-of-Flight sensors and sends their distance measurements to the main Raspberry Pi for wall detection and parking.
+
+<table>
+  <tr>
+    <td align="center">
+      <strong>Raspberry Pi Pico</strong><br>
+      <img src="./images/raspberry-pi-pico.jpg" width="400">
+    </td>
+    <td align="center">
+      <strong>VL53L0X ToF Sensor</strong><br>
+      <img src="./images/vl53l0x.jpg" width="400">
+    </td>
+  </tr>
+</table>
+
+---
+
+#### 1\. Hardware Choices
+
+###### **1.1 Raspberry Pi Pico**
+
+We chose the Raspberry Pi Pico to manage the distance sensors separately from the main Raspberry Pi. It handles sensor startup, I2C communication, address assignment, and USB serial output.
+
+###### **1.2 VL53L0X Time-of-Flight Sensors**
+
+We chose the VL53L0X because it is compact, provides measurements in millimeters, and supports multiple sensors through I2C.
+
+The sensors are mainly used for close-range wall detection and parking positioning.
+
+---
+
+#### 2\. Wiring and Sensor Addresses
+
+The sensors share the Pico's I2C0 connection:
+
+| Connection | Pico pin |
+|---|---:|
+| SDA | GP2 |
+| SCL | GP3 |
+| I2C frequency | 400 kHz |
+
+Each sensor has a separate XSHUT pin:
+
+| Sensor | XSHUT pin | I2C address |
+|---|---:|---:|
+| A | GP18 | `0x2A` |
+| B | GP19 | `0x2B` |
+| C | GP20 | `0x2C` |
+| D | GP21 | Disabled |
+
+All VL53L0X sensors initially use address `0x29`. The Pico starts them individually and gives each active sensor a unique address.
+
+<img width="700" alt="ToF sensor wiring diagram" src="./images/tof-wiring-diagram.png" />
+
+---
+
+#### 3\. Code Structure
+
+###### **3.1 `main.py`**
+
+The main MicroPython program:
+
+- Initializes I2C0
+- Controls the XSHUT pins
+- Assigns unique sensor addresses
+- Reads sensors A, B, and C
+- Filters invalid readings
+- Sends distance values to the Raspberry Pi
+
+###### **3.2 `vl53l0x.py`**
+
+This is the MicroPython driver used to communicate with the VL53L0X sensors.
+
+It must be stored on the Pico beside `main.py`.
+
+---
+
+#### 4\. Sensor Startup Process
+
+The Pico initializes the sensors in this order:
+
+1. Shut down all four sensors.
+2. Enable sensor A and assign address `0x2A`.
+3. Enable sensor B and assign address `0x2B`.
+4. Enable sensor C and assign address `0x2C`.
+5. Keep sensor D disabled.
+6. Begin continuous distance readings.
+
+This prevents multiple sensors from responding at the default `0x29` address.
+
+---
+
+#### 5\. Serial Data Output
+
+The Pico sends one line of data during each reading cycle:
+
+```text
+A=125.0,B=84.0,C=310.0
+```
+
+All distances are measured in millimeters.
+
+Invalid measurements are sent as:
+
+```text
+-1.0
+```
+
+A measurement is rejected when it is zero, negative, `8191 mm` or greater, or when an I2C error occurs.
+
+---
+
+#### 6\. Purpose on the Vehicle
+
+The ToF system is used to:
+
+- Measure the distance from nearby walls
+- Position the robot before parking
+- Follow the parking wall
+- Detect stopping distances
+- Prevent invalid readings from affecting steering
+
+The Pico reads the sensors, while the main Raspberry Pi uses the measurements in the driving and parking programs.
+
+<table>
+  <tr>
+    <td align="center">
+      <strong>Sensor Placement</strong><br>
+      <img src="./images/tof-sensor-placement.jpg" width="700">
+    </td>
+  </tr>
+</table>
+
+---
+
+#### 7\. Current Folder Structure
+
+```text
+pico/
+├── README.md
+├── main.py
+├── vl53l0x.py
+└── images/
+    ├── raspberry-pi-pico.jpg
+    ├── vl53l0x.jpg
+    ├── tof-wiring-diagram.png
+    └── tof-sensor-placement.jpg
+```
+
+---
+
+#### 8\. Image Sources
+
+- [Raspberry Pi Pico image](https://commons.wikimedia.org/wiki/File:Raspberry_Pi_Pico_oblique.jpg)
+- [VL53L0X sensor images](https://www.pololu.com/product/2490/pictures)
+
+The wiring diagram and sensor-placement photograph should show our team's actual robot and wiring.
+````
