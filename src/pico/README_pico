@@ -1,97 +1,49 @@
-### Time-of-Flight Sensor System
-[All Raspberry Pi Pico and VL53L0X code files are in this directory](./)
+# Raspberry Pi Pico ToF System
 
-#### 1\. Basic Hardware Choices
+## Purpose
 
-###### **1.1 Raspberry Pi Pico**
-We chose the Raspberry Pi Pico to control the distance sensors separately from the main Raspberry Pi. It handles sensor startup, I2C communication, address assignment, distance readings, and USB serial output.
+The sensors measure distances from nearby walls and send the values to the main Raspberry Pi for parking and wall-positioning.
 
-<img width="500" height="430" alt="Raspberry Pi Pico" src="https://upload.wikimedia.org/wikipedia/commons/thumb/4/41/Raspberry_Pi_Pico_oblique.jpg/960px-Raspberry_Pi_Pico_oblique.jpg" />
+## Wiring
 
-###### **1.2 VL53L0X Time-of-Flight Sensors**
-We chose the VL53L0X because it is compact, communicates through I2C, and reports distance in millimeters. The sensors provide close-range wall measurements for the parking system.
+| Sensor | XSHUT pin |  Address |
+| ------ | --------: | -------: |
+| A      |      GP18 |   `0x2A` |
+| B      |      GP19 |   `0x2B` |
+| C      |      GP20 |   `0x2C` |
+| D      |      GP21 |   `0x2D` |
 
-<img width="600" height="520" alt="VL53L0X Time-of-Flight sensor" src="https://cdn-learn.adafruit.com/assets/assets/000/093/499/medium640/adafruit_products_VL53L0X_Arduino_original.png?1595612101=" />
+The sensors share:
 
----
+* I2C0
+* SDA: GP2
+* SCL: GP3
+* Frequency: 400 kHz
 
-#### 2\. Wiring and Sensor Addresses
+## Code
 
-- **I2C Bus:** I2C0
-- **SDA:** GP2
-- **SCL:** GP3
-- **I2C Frequency:** 400 kHz
-- **Sensor A:** XSHUT GP18, address `0x2A`
-- **Sensor B:** XSHUT GP19, address `0x2B`
-- **Sensor C:** XSHUT GP20, address `0x2C`
-- **Sensor D:** XSHUT GP21, currently disabled
+### `main.py`
 
-All VL53L0X sensors begin at the default address `0x29`. The Pico starts each sensor separately and assigns it a unique address.
+The main program:
 
----
+* Starts the sensors one at a time
+* Assigns unique I2C addresses
+* Reads sensors A, B, and C
+* Rejects invalid measurements
+* Sends the values through USB serial
 
-#### 3\. Sensor Initialization
+Example output:
 
-- **Shutdown:** All four sensors are held in shutdown when the program starts.
-- **Sensor A:** Enabled first and changed from `0x29` to `0x2A`.
-- **Sensor B:** Enabled next and changed to `0x2B`.
-- **Sensor C:** Enabled last and changed to `0x2C`.
-- **Sensor D:** Remains disabled to prevent an address conflict.
-- **Reading Loop:** Sensors A, B, and C are then read continuously.
+```text
+A=125.0,B=84.0,C=10.0
+```
 
-This process allows several identical sensors to share the same SDA and SCL wires.
+Invalid readings are sent as:
 
----
+```text
+-1.0
+```
 
-#### 4\. Code Files
+### `vl53l0x.py`
 
-###### **4.1 `main.py`**
-The main MicroPython program:
-
-- Initializes I2C0
-- Controls the XSHUT pins
-- Assigns unique sensor addresses
-- Reads sensors A, B, and C
-- Rejects invalid measurements
-- Sends distance values to the Raspberry Pi
-
-###### **4.2 `vl53l0x.py`**
-This is the MicroPython driver used to communicate with the VL53L0X sensors. It is stored on the Pico beside `main.py`.
-
----
-
-#### 5\. Serial Data Output
-
-The Pico sends one line of data during each reading cycle:
-
-`A=125.0,B=84.0,C=310.0`
-
-All values are measured in millimeters.
-
-Invalid measurements are sent as:
-
-`-1.0`
-
-A reading is rejected when it is zero, negative, `8191 mm` or greater, or when an I2C error occurs.
-
----
-
-#### 6\. Purpose on the Vehicle
-
-The ToF system is used to:
-
-- Measure distances from nearby walls
-- Position the robot before parking
-- Follow the parking wall
-- Detect stopping distances
-- Prevent invalid measurements from affecting steering decisions
-
-The Pico reads the sensors, while the main Raspberry Pi uses the received measurements in the parking program.
-
----
-
-#### 7\. Current Files
-
-- `README.md`
-- `main.py`
-- `vl53l0x.py`
+This is the MicroPython driver used to communicate with the VL53L0X sensors.
