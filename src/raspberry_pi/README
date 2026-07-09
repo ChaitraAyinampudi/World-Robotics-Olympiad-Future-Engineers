@@ -1,0 +1,99 @@
+# Raspberry Pi Programs
+
+### `manage26V17.py`
+
+Main vehicle-control program.
+
+It handles:
+
+* DonkeyCar recording
+* Autonomous model driving
+* Raspberry Pi camera input
+* PS4 controller input
+* DYNAMIXEL steering and throttle
+* Sense HAT model selection
+* Gyro-based lap tracking
+* Obstacle parking exit
+* Camera preview
+* Tub-record deletion
+* Safe shutdown
+
+Available modes:
+
+```bash
+ manage26V17.py --recording
+ manage26V17.py --driving
+ manage26V17.py --driving-view
+ manage26V17.py --driving-skip
+ manage26V17.py --driving-view-skip
+```
+
+Driving modes:
+
+* `FCW` — Free Run clockwise
+* `FCCW` — Free Run counterclockwise
+* `OCW` — Obstacle Run clockwise
+* `OCCW` — Obstacle Run counterclockwise
+
+A mode can also be selected directly:
+
+```bash
+%Run manage26V17.py --driving
+```
+
+---
+
+### `dynamixel_functions.py`
+
+DYNAMIXEL motor-control program used for testing.
+
+Main functions:
+
+```python
+run_position(motor_id, speed, angle)
+run_for_seconds(motor_id, speed, seconds)
+run_for_degrees(motor_id, speed, degrees)
+```
+
+The file can also be imported into another Python program.
+
+---
+
+## Hardware Settings
+
+| Setting           |          Value |
+| DYNAMIXEL port    | `/dev/ttyUSB0` |
+| Baud rate         |        `57600` |
+| Protocol          |          `2.0` |
+| Throttle motor ID |            `1` |
+| Steering motor ID |            `2` |
+
+The programs use different steering-center values:
+
+| File                     | Steering center |
+| `manage26V17.py`         |          `3060` |
+| `dynamixel_functions.py` |          `3126` |
+---
+
+## Required Hardware
+
+* Raspberry Pi
+* U2D2
+* 2 DYNAMIXEL XL330 motors
+* Raspberry Pi Camera
+* Sense HAT
+* PS4 controller for recording mode
+
+---
+
+## Required Python Packages
+
+```text
+donkeycar
+tensorflow
+numpy
+pygame
+dynamixel-sdk
+sense-hat
+picamera
+```
