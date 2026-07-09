@@ -34,16 +34,14 @@ The main program:
 
 Example output:
 
-```text
 A=125.0,B=84.0,C=10.0
-```
 
 Invalid readings are sent as:
 
-```text
+
 -1.0
-```
+
+This is the MicroPython driver used to communicate with the VL53L0X sensors.
 
 ### `vl53l0x.py`
 
-This is the MicroPython driver used to communicate with the VL53L0X sensors.
