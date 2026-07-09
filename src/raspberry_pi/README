@@ -20,13 +20,12 @@ It handles:
 
 Available modes:
 
-```bash
  manage26V17.py --recording
  manage26V17.py --driving
  manage26V17.py --driving-view
  manage26V17.py --driving-skip
  manage26V17.py --driving-view-skip
-```
+
 
 Driving modes:
 
@@ -37,9 +36,7 @@ Driving modes:
 
 A mode can also be selected directly:
 
-```bash
 %Run manage26V17.py --driving
-```
 
 ---
 
@@ -49,11 +46,9 @@ DYNAMIXEL motor-control program used for testing.
 
 Main functions:
 
-```python
 run_position(motor_id, speed, angle)
 run_for_seconds(motor_id, speed, seconds)
 run_for_degrees(motor_id, speed, degrees)
-```
 
 The file can also be imported into another Python program.
 
@@ -88,7 +83,6 @@ The programs use different steering-center values:
 
 ## Required Python Packages
 
-```text
 donkeycar
 tensorflow
 numpy
@@ -96,4 +90,3 @@ pygame
 dynamixel-sdk
 sense-hat
 picamera
-```
